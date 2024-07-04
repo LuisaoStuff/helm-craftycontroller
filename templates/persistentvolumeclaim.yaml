@@ -1,0 +1,19 @@
+{{ $name := include "crafty.name" . }}
+{{- range $key, $size := .Values.storage.sizes }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-{{ $key }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app: {{ $name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ $size }}
+  storageClassName: {{ $.Values.storage.className }}
+  volumeName: pv-{{ $key }}
+{{- end }}

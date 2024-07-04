@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "crafty.name" . }}-minecraft
+spec:
+  ports:
+    {{- range untilStep (int .Values.tcp.portRangeStart) (int .Values.tcp.portRangeEnd) 1 }}
+    - name: mc-port-{{ . }}
+      port: {{ . }}
+      targetPort: {{ . }}
+      protocol: TCP
+    {{- end }}
+    - name: voice-chat
+      port: 24454
+      targetPort: 24454
+      protocol: UDP
+  selector:
+    app: {{ include "crafty.name" . }}
+  externalIPs:
+  - {{ .Values.externalIP | quote }}

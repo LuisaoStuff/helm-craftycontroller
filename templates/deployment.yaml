@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "crafty.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "crafty.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "crafty.name" . }}
+    spec:
+      containers:
+        - name: crafty
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: crafty
+              containerPort: {{ .Values.service.ports.crafty.targetPort }}
+              protocol: TCP
+            - name: dynmap
+              containerPort: {{ .Values.service.ports.dynmap.targetPort }}
+              protocol: TCP
+            - name: voice-chat
+              containerPort: 24454
+              protocol: UDP
+            {{- range untilStep (int .Values.tcp.portRangeStart) (int .Values.tcp.portRangeEnd) 1 }}
+            - name: mc-port-{{ . }}
+              containerPort: {{ . }}
+              protocol: TCP
+            {{- end }}
+          volumeMounts:
+            {{- range $key, $path := .Values.storage.sizes }}
+            {{- if eq $key "config" }}
+            - name: {{ $key }}
+              mountPath: /crafty/app/{{ $key }}
+            {{- else }}
+            - name: {{ $key }}
+              mountPath: /crafty/{{ $key }}
+            {{- end }}
+            {{- end }}
+      nodeName: cronos
+      volumes:
+        {{- range $key, $path := .Values.storage.sizes }}
+        - name: {{ $key }}
+          persistentVolumeClaim:
+            claimName: pvc-{{ $key }}
+        {{- end }}

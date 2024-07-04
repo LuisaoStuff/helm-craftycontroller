@@ -1,0 +1,5 @@
+apiVersion: v2
+name: crafty
+description: A Helm chart for deploying Crafty with Nginx Ingress
+version: 0.1.0
+appVersion: 4.40

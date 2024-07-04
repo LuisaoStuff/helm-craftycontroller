@@ -1,0 +1,64 @@
+replicaCount: 1
+
+externalIP: 192.168.1.39
+
+nameOverride: crafty
+
+namespace: minecraft
+
+image:
+  repository: arcadiatechnology/crafty-4
+  tag: "4.4.0"
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  ports:
+    crafty:
+      port: 8443
+      targetPort: 8443
+    dynmap:
+      port: 8123
+      targetPort: 8123
+
+ingress:
+  hosts:
+  - host: crafty.example.com
+    subdomains:
+    - crafty
+    tls:
+      enabled: true
+      name: com-tls-secret
+      cert: BASE64_ENCODED_CERT_EXAMPLE_COM
+      key: BASE64_ENCODED_KEY_EXAMPLE_COM
+  - host: example.es
+    subdomains:
+    - crafty
+    tls:
+      enabled: true
+      name: es-tls-secret
+      cert: BASE64_ENCODED_CERT_EXAMPLE_ES
+      key: BASE64_ENCODED_KEY_EXAMPLE_ES
+tcp:
+  portRangeStart: 25500
+  portRangeEnd: 25600
+  hostname: minecraft
+
+storage:
+  hostname: cronos
+  className: local-storage
+  basePath: /home/minecraft
+  sizes:
+    backups: 10Gi
+    logs: 5Gi
+    servers: 100Gi
+    config: 1Gi
+    import: 1Gi
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

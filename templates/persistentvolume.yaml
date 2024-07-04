@@ -1,0 +1,29 @@
+{{ $name := include "crafty.name" . }}
+{{- range $key, $size := .Values.storage.sizes }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-{{ $key }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    app: {{ $name }}
+spec:
+  capacity:
+    storage: {{ $size }}
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ $.Values.storage.className }}
+  local:
+    path: {{ $.Values.storage.basePath }}/{{ $key }}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ $.Values.storage.hostname }}
+{{- end }}
